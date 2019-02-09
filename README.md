@@ -25,7 +25,7 @@
 - 与组织相关的代码，属于纯前端代码，比如html,css,javascript，因为这些代码本身是通过浏览器向外部开放的，因此是否定义为敏感信息，请根据公司安全管理要求进行定义，需要考虑的是，这些代码可能会特别多，会给结果造成大量的干扰，因此如何处理这种情况，也是需要考虑的
 
 
-简单列一下github的限制，其中必要重要的是：
+简单列一下github的限制，其中比较重要的是：
 
 *1.To satisfy that need, the GitHub Search API provides up to 1,000 results for each search. //每次搜索请求最多提供1000条结果*
 
