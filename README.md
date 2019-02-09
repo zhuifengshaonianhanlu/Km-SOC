@@ -82,9 +82,13 @@
 python项目，用到的框架为Flask,数据库为mysql。
 
 下面是一个简单的部署指导：
+
 app---前端web和flask api接口
+
 web.py---web服务启动主程序
+
 spider---github搜索主程序
+
 
 1.app/setting.py,前端配置文件，需要指定数据库连接串配置。请先创建好数据库。
 
