@@ -55,13 +55,48 @@
 
 
 
-截几张图（个人对前端代码，特别是美化这一块，在借助了前端模板ace admin的情况下，勉强做出了一个还过得去的界面）：
+截几张图：
+登录界面：
 
+![image](https://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/login.png)
 
+用户管理界面：
 
+![image](https://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/user.png)
 
+配置管理界面：所有的配置可以在这里添加
 
+![image](https://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/conf.png)
+
+结果展示-1：所有命中了keyword的项目都会在这里列出来，可以在这里添加白名单（白名单里面的项目下次不会扫描）
+
+![image](https://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-1.png)
+
+结果展示-2：这里详细显示了搜索的结果，同时会按照文件类型进行统计展示，点击某个问价类型，可以单独显示该类型所有的搜索结果。
+同时，点击payload,会仅显示该payload的结果。
+
+![image](https://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-2.png)
 
 
 python项目，用到的框架为Flask,数据库为mysql。
+
+下面是一个简单的部署指导：
+app---前端web和flask api接口
+web.py---web服务启动主程序
+spider---github搜索主程序
+
+1.app/setting.py,前端配置文件，需要指定数据库连接串配置。请先创建好数据库。
+
+2.spider/config/conf.ini,搜索程序配置文件，主要指定数据库连接串，github的token,spidier里面的配置可以通过soc界面进行配置，也可以在这里手动配置。
+
+3.启动爬虫程序：python /spider/spider.py
+
+4.启动web服务：python web.py
+
+5.入口：http://127.0.0.1:5000/login
+
+
+
+
+
 
