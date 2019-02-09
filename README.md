@@ -52,6 +52,8 @@
 
 6. 以结果文件hash值为主键进行去重。
 
+7. 为了更加有效率的扫描和有效的逃避githu风控规则，支持使用多个token进行扫描，建议配置至少≥2个以上token（spider/config/conf.ini中spider的token选项）
+
 
 
 截几张图：(如果加载不出来，点一下可以单独打开)
