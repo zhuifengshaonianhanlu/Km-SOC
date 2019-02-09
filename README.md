@@ -1,19 +1,28 @@
 # Km-SOC
+
 github源码监控系统
 
 说实在的，github源码监控的系统开源的很多，但老夫看来，写的都不行。
 倒不是技术问题，我觉得主要是没有站在“安全运营”的角度来进行思考和设计。
 
-在我看来github源码监控系统主要的目的只有一个，干脆和清晰，那就是：
+在我看来github源码监控系统主要的目的只有一个，干脆而清晰，那就是：
 尽可能全面的，及时的，发现与组织敏感信息相关的源码是否出现在github上
 
 所以这里有几个重点：
-1.全面的:不管是使用纯爬虫的方式爬网页内容，还是使用github-API进行结果搜索，其都会受到github的“风控”限制
+1.全面的:不管是使用纯爬虫的方式爬网页内容，还是使用github-API进行结果搜索，其都会受到github的“风控”限制，其中有一个限制是每次搜索请求组多提供1000条结果记录，也就是1000条以外会被遗漏掉。因此，如何全面的搜索与指定信息相关的内容，是一个必须要考虑的地方。
+2.及时的：这个没啥好说的，周期性的全github搜索即可，确保这个周期在可接受的范围同时又不触发github风控规则即可。
+3.敏感信息：需要定义好，什么样的信息是敏感信息。在github这样的场景中，不管是什么公司，至少有如下两点需要包含在敏感信息的范围：
+- 与组织相关的代码，同时又包含了组织比较敏感的信息，比如数据库连接串，秘钥，证书信息等。
+- 与组织相关的代码，不包含以上敏感信息，但属于公司业务代码，泄露了公司的业务逻辑
+
+
+
 
 github的限制：
 1.To satisfy that need, the GitHub Search API provides up to 1,000 results for each search. //每次搜索请求最多提供1000条结果
 2.The Search API has a custom rate limit. For requests using Basic Authentication, OAuth, or client ID and secret, you can make up to 30 requests per minute //认证后的请求每分钟最多30次
 3.
+
 
 为了尽可能全面的，准确的找到“有风险”的告警，设计思路如下：
 1.管理员提供需要搜索的keyword,keyword可以是多个 //keyword表示目标关键字，但不代表风险关键词，比如你要搜索海风教育的泄露，keyword应该是：“hfjy.com”,“hfjy”,“海风教育”等
