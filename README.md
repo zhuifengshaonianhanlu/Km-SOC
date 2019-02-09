@@ -101,6 +101,14 @@ spider---github搜索主程序
 5.入口：http://127.0.0.1:5000/login
 
 
+而对于最开始说的扩展性，主要指的是：
+
+1.所有的api都是使用blueprint进行模块化注册的，在app/__init__.py的register_blueprint（）函数中进行注册即可。
+
+2.web界面中左边的功能列表可以在lay.html中进行添加
+
+
+
 
 
 
