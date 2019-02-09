@@ -55,7 +55,7 @@
 
 
 
-截几张图：
+截几张图：(如果加载不出来，点一下可以单独打开)
 登录界面：
 </br>
 ![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/login.png)
