@@ -1,0 +1,226 @@
+{% extends "lay.html" %}
+
+{% block maincontent %}
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs ace-save-state" id="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="ace-icon fa fa-home home-icon"></i>
+                        <a href="/kmrs">源码泄露</a>
+                    </li>
+                    <li class="active">监控结果-详细信息</li>
+                </ul><!-- /.breadcrumb -->
+            </div>
+
+            <div class="page-content">
+                <h3 class="header smaller lighter blue">
+                    设置keyword &amp; payload
+                    <small>在包含keyword的项目中，命中了payload的文件会产生记录和告警;</small>
+                </h3>
+
+                <div>
+                    <label>添加Keyword:<input id="keyword" type="text" style="width: 500px" placeholder="多个请用逗号隔开,如:beijing,shanghai"/></label>
+                    <button class="btn btn-minier btn-inverse" onclick="addconf('keyword')">添加</button><br>
+                    <label style="color: #2A91D8">Keyword:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% for k in keyword %}
+                        {% if k %}
+                        <button title="点击即可删除" type="button" class="btn btn-white btn-danger btn-sm" onclick="delkey('keyword','{{k}}')">{{k}}</button>
+                        {% endif %}
+                        {% endfor %}
+                    </label>
+                </div>
+
+                <div class="space-8"></div>
+
+                <div>
+                    <label>添加Payload:  <input id="payload" type="text" style="width: 500px" placeholder="多个请用逗号隔开,如:password,mysql"/></label>
+                    <button class="btn btn-minier btn-inverse" onclick="addconf('payload')">添加</button><br>
+                    <label style="color: #2A91D8;">Payload:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% for k in payload %}
+                        {% if k %}
+                        <button type="button" class="btn btn-white btn-danger btn-sm" onclick="delkey('payload','{{k}}')">{{k}}</button>
+                        {% endif %}
+                        {% endfor %}
+                    </label>
+                </div>
+
+
+                <div class="space-12"></div>
+
+                <h3 class="header smaller lighter blue">
+                    设置需要搜索的语言
+                    <small>根据指定的语言进行敏感信息泄露监控</small>
+                </h3>
+                <div>
+                    <label>添加开发语言:  <input id="language" type="text" style="width: 500px" placeholder="多个请用逗号隔开，如:java,python,go"/></label>
+                    <button class="btn btn-minier btn-inverse" onclick="addconf('language')">添加</button><br>
+                    <label style="color: #2A91D8;">Language:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% for k in language %}
+                        {% if k %}
+                        <button type="button" class="btn btn-white btn-danger btn-sm" onclick="delkey('language','{{k}}')">{{k}}</button>
+                        {% endif %}
+                        {% endfor %}
+                    </label>
+                </div>
+
+                <div class="space-12"></div>
+
+                <h3 class="header smaller lighter blue">
+                    扫描文件个数
+                    <small>github最多允许1000条结果，你也可以指定一个≤1000的数字</small>
+                </h3>
+                <div>
+                    <label>扫描数量:  <input id="target" type="text" style="width: 300px" placeholder="默认为1000，你也可以设定一个≤1000的数字"/></label>
+                    <button class="btn btn-minier btn-inverse" onclick="addconf('target')">添加</button><br>
+                    <label style="color: #2A91D8;">目标数量:<label style="color: purple">{{target}}</label></label>
+                </div>
+
+                <div class="space-12"></div>
+
+                <h3 class="header smaller lighter blue">
+                    项目白名单(总计:{{wltotal}}个)
+                    <small>白名单里面的项目不会再被扫描</small>
+                </h3>
+                <div>
+                    <table id="simple-table" class="table  table-bordered table-hover">
+                        <thead><tr>
+                         <th style="width: 5%">时间</th>
+                         <th style="width: 5%">作者名称</th>
+                         <th style="width: 5%">项目名称</th>
+                         <th style="width: 15%">项目地址</th>
+                         <th style="width: 3%">操作</th>
+
+                        </tr></thead>
+                        <tbody>
+                        {% for r in wlist %}
+                        <tr>
+                        <td>{{r['wtime']}}</td>
+                        <td>{{r['owner']}}</td>
+                        <td>{{r['pname']}}</td>
+                        <td>{{r['purl']}}</td>
+                        <td><button class="btn btn-minier btn-inverse" onclick=delwl("{{r['purl']}}")>删除</button></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+
+                 <div class="space-24"></div>
+
+
+
+
+{% with message = get_flashed_messages() %}
+{% if message %}
+{% for msg in message %}
+<p>{{msg}}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+
+{% if form and form.errors %}
+{% for key, error in form.errors.items() %}
+<div class="alert alert-warning" role="alert">{{ error }}</div>
+{% endfor %}
+{% endif %}
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+{% block pagescript %}
+<script>
+    function delwl(purl) {
+        $.ajax({
+            url: "/kmdelwl",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data: JSON.stringify({'purl': purl}),
+            success: function (data) {
+                rs = data.result;
+                if (rs = 'ok') {
+                    alert('白名单删除成功，下次扫描该项目将会被重新扫描');
+                    location.reload();
+                }
+            },
+            error:function () {
+                alert('ajax请求错误');
+            }
+
+        })
+    }
+
+    function addconf(type) {
+
+        if(type == 'keyword'){
+            postdata = $("#keyword").val();
+        }
+
+        if(type == 'payload'){
+            postdata = $("#payload").val();
+        }
+        if(type == 'language'){
+            postdata = $("#language").val();
+        }
+
+        if(type == 'target'){
+            postdata = $("#target").val();
+        }
+//        alert(postdata);
+
+        $.ajax({
+            url: "/kmaddconf",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data: JSON.stringify({'type': type,'conf':postdata}),
+            success: function (data) {
+                rs = data.result;
+                alert(rs);
+                location.reload();
+
+            },
+            error: function () {
+                alert('ajax请求错误!');
+            }
+        })
+    }
+
+    function delkey(type,key) {
+        if(confirm('要删除该配置项吗?')){
+            $.ajax({
+            url: "/delkey",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data: JSON.stringify({'type':type,'key':key}),
+            success: function (data) {
+                rs = data.result;
+                if (rs = 'ok') {
+//                    alert('删除成功');
+                    location.reload();
+                }
+            },
+            error:function () {
+                alert('ajax请求错误');
+            }
+
+        })
+
+        }
+
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,326 @@
+{% extends "lay.html" %}
+
+{% block maincontent %}
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs ace-save-state" id="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="ace-icon fa fa-home home-icon"></i>
+                        <a href="/kmrs">源码泄露</a>
+                    </li>
+                    <li class="active">监控结果-详细信息</li>
+                </ul><!-- /.breadcrumb -->
+            </div>
+
+            <div class="page-content">
+                <div class="profile-user-info profile-user-info-striped">
+                    <div class="profile-info-row">
+                        <div class="profile-info-name">项目作者</div>
+
+                        <div class="profile-info-value">
+                            <span class="editable">{{owner}}</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-row">
+                        <div class="profile-info-name"> 项目名称</div>
+
+                        <div class="profile-info-value">
+                            <span class="editable">{{pname}}</span>
+                        </div>
+                    </div>
+
+                     <div class="profile-info-row">
+                        <div class="profile-info-name">项目地址</div>
+
+                        <div class="profile-info-value">
+                            <span class="editable"><a href="{{purl}}">{{purl}}</a></span>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-row">
+                        <div class="profile-info-name">命中的keyword</div>
+
+                        <div class="profile-info-value">
+                            <span class="editable">{{keyword}}</span>
+                        </div>
+                    </div>
+                    <div class="profile-info-row">
+                        <div class="profile-info-name">命中的payload</div>
+
+                        <div class="profile-info-value">
+                            {% if payload %}
+                            {% for i in payload%}
+                            <button type="button" class="btn btn-white btn-purple btn-sm" onclick=kmpd('{{owner}}','{{pname}}','{{i}}')>{{i}}</button>
+                            {% endfor %}
+                            {% else %}
+                            <label>该项目中包含keyword关键字，但没有发现payload</label>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="space-10"></div>
+                <span>Tips:点击按钮，可以一次性确认掉所有该语言对应的告警</span>
+               <div>
+                   {% if payload %}
+                   {% for b in filetype %}
+                    <button class="{{b['btn']}}" style="margin: 3px 3px 3px 2px;font-size: 14px" onclick=kmft('{{owner}}','{{pname}}',"{{b['filetype']}}")> {{b['filetype']}}
+                        <a href=javascript:kmall('{{owner}}','{{pname}}',"{{b['filetype']}}") style="color: white"  >（{{b['count']}}）</a>
+                    </button>
+                   {% endfor %}
+                   {% endif %}
+
+                </div>
+
+            <div class="space-8"></div>
+
+            <div id="detail_result">
+                {% for r in result %}
+                    <div class="row" >
+                        <div class="col-xs-12">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-flat">
+                                    <h4 class="smaller">
+
+                                        <i class="ace-icon fa fa-code"></i>
+                                        <a href="{{r['fileurl']}}">{{r['filename']}}</a>
+
+
+
+                                        {% if r['confirm'] == 0 %}
+                                        <div id="{{r['filehash']}}">
+                                        <button  class="btn btn-minier btn-pink" style="float: right" onclick=kmconfirm("{{r['filehash']}}")>未确认</button>
+                                        </div>
+                                        {% else %}
+                                        <button class="btn btn-minier btn-primary" style="float: right">已确认</button>
+                                        {% endif %}
+
+                                        <button class="btn btn-minier btn" style="float: right" title="{{r['note']}}" onclick=adddes("{{r['filehash']}}")>描述</button>
+
+
+                                    </h4>
+                                </div>
+
+                                <div class="widget-body">
+                                    <div class="widget-main">
+                                        <pre style="color: #b37400;">
+                                            {{r['content']}}
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {%endfor%}
+                </div>
+
+
+{% with message = get_flashed_messages() %}
+{% if message %}
+{% for msg in message %}
+<p>{{msg}}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+
+{% if form and form.errors %}
+{% for key, error in form.errors.items() %}
+<div class="alert alert-warning" role="alert">{{ error }}</div>
+{% endfor %}
+{% endif %}
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+{% block pagescript %}
+<script>
+    function html2Escape(sHtml) {
+        return sHtml.replace(/[<>&"]/g,function(c){
+            return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];
+        });
+            }
+    function kmpd(owner,pname,payload){
+        $.ajax({
+            url: "/kmpd/" + owner + "/" + pname + "/" + payload,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success: function(data) {
+                // rs = JSON.parse(data);
+                // rs = JSON.stringify(data);
+                // alert(data.result);
+                chain_records = data.result;
+
+                result_content = '';
+                chain_records.forEach(function (chain) {
+                    result_content += '<div class="row" >'
+                    result_content += '<div class="col-xs-12">'
+                    result_content += '<div class="widget-box">'
+                    result_content += '<div class="widget-header widget-header-flat">'
+                    result_content += '<h4 class="smaller">'
+                    result_content += '<i class="ace-icon fa fa-code"></i>'
+                    result_content += '<a href="' + chain.fileurl + '">' + chain.filename + '</a>'
+                    if (!chain.confirmv) {
+                        result_content += '<div id="' + chain.filehash + '">'
+                        result_content += '<button class="btn btn-minier btn-pink" style="float: right" onclick=kmconfirm("' + chain.filehash + '")>未确认</button>'
+                        result_content += '</div>'
+
+                    } else {
+                        result_content += '<button class="btn btn-minier btn-primary" style="float:right">已确认</button>'
+                    }
+                    result_content += '<button class="btn btn-minier btn" onclick=adddes("' + chain.filehash +'") style="float: right" title="' + chain.note +'">描述</button>'
+                    result_content += '</h4>'
+                    result_content += '</div>'
+                    result_content += '<div class="widget-body">'
+                    result_content += '<div class="widget-main">'
+                    result_content += '<pre style="color: #b37400;">' + html2Escape(chain.contentv) + '</pre>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+
+                })
+                $("#detail_result").html(result_content);
+            },
+            error:function () {
+                alert('ajax请求错误!');
+            }
+        })
+    }
+
+
+    function kmconfirm(filehash) {
+        $.ajax({
+            url: "/kmconfirm/" + filehash,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success:function (data) {
+                rs = data.result;
+//                alert(rs);
+                if(rs = 'ok'){
+                    confirdiv = '<button class="btn btn-minier btn-primary" style="float: right">已确认</button>'
+                    $("#" + filehash).html(confirdiv)
+                }else{
+                    alert('确认失败!');
+                }
+
+            },
+            error:function () {
+                alert('ajax请求错误!')
+            }
+        })
+    }
+
+    function kmall(owner,pname,filetype) {
+        if(confirm("要确认掉该类型所有告警吗？")){
+            $.ajax({
+            url: "/kmall/" + owner + "/" + pname + "/" + filetype,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success:function (data) {
+                rs = data.result;
+                if(rs = 'ok'){
+                    alert('确认成功');
+                    location.reload();
+
+                }else{
+                    alert('确认失败');
+                }
+            }
+            })
+        }
+
+    }
+
+
+    function kmft(owner,pname,filetype){
+        $.ajax({
+            url: "/kmft/" + owner + "/" + pname + "/" + filetype,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success: function(data) {
+                // rs = JSON.parse(data);
+                // rs = JSON.stringify(data);
+                // alert(data.result);
+                chain_records = data.result;
+
+                result_content = '';
+                chain_records.forEach(function (chain) {
+                    result_content += '<div class="row" >'
+                    result_content += '<div class="col-xs-12">'
+                    result_content += '<div class="widget-box">'
+                    result_content += '<div class="widget-header widget-header-flat">'
+                    result_content += '<h4 class="smaller">'
+                    result_content += '<i class="ace-icon fa fa-code"></i>'
+                    result_content += '<a href="' + chain.fileurl + '">' + chain.filename + '</a>'
+                    if (!chain.confirmv) {
+                        result_content += '<div id="' + chain.filehash + '">'
+                        result_content += '<button class="btn btn-minier btn-pink" style="float: right" onclick=kmconfirm("' + chain.filehash + '")>未确认</button>'
+                        result_content += '</div>'
+
+                    } else {
+                        result_content += '<button class="btn btn-minier btn-primary" style="float:right">已确认</button>'
+                    }
+                    result_content += '<button class="btn btn-minier btn" onclick=adddes("' + chain.filehash +'") style="float: right" title="' + chain.note +'">描述</button>'
+                    result_content += '</h4>'
+                    result_content += '</div>'
+                    result_content += '<div class="widget-body">'
+                    result_content += '<div class="widget-main">'
+                    result_content += '<pre style="color: #b37400;">' + html2Escape(chain.contentv) + '</pre>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+                    result_content += '</div>'
+
+                })
+                $("#detail_result").html(result_content);
+            },
+            error:function () {
+                alert('ajax请求错误!');
+            }
+        })
+    }
+    function adddes(filehash) {
+        var desdata = prompt("请为该条目添加备注信息");
+        $.ajax({
+            url: "/kmnote/" + filehash,
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data:JSON.stringify({"note":desdata}),
+            async: true,
+            success:function (data) {
+                rs = data.result;
+                if(rs = 'ok'){
+                    alert('备注添加成功');
+                    location.reload();
+
+                }else{
+                    alert('添加失败');
+                }
+            }
+        })
+    }
+
+
+</script>
+
+{% endblock %}

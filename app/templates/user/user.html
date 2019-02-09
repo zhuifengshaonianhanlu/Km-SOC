@@ -1,0 +1,166 @@
+{% extends "lay.html" %}
+
+{% block maincontent %}
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs ace-save-state" id="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="ace-icon fa fa-home home-icon"></i>
+                        <a href="#">用户中心</a>
+                    </li>
+                    <li class="active">用户管理</li>
+                </ul><!-- /.breadcrumb -->
+            </div>
+
+            <div class="page-content">
+
+                {% with message = get_flashed_messages() %}
+                {% if message %}
+                {% for msg in message %}
+                <p>{{msg}}</p>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+
+                {% if form and form.errors %}
+                {% for key, error in form.errors.items() %}
+                <div class="alert alert-warning" role="alert">{{ error }}</div>
+                {% endfor %}
+                {% endif %}
+
+                <h3 class="header smaller lighter blue">
+                    用户添加
+                    <small>用户的添加，删除管理;</small>
+                </h3>
+
+                <div class="profile-user-info profile-user-info-striped" style="width: 300px;float: left">
+                    <div class="profile-info-row" >
+                        <div class="profile-info-name"> Username </div>
+
+                        <div class="profile-info-value">
+                            <input id="username" type="text" style="width: 299px" name="username" placeholder="必填"/>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-row" >
+                        <div class="profile-info-name"> Password </div>
+
+                        <div class="profile-info-value">
+                            <input id="password" type="password" style="width: 299px" name="password" placeholder="必填"/>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-row" >
+                        <div class="profile-info-name"> E-mail </div>
+
+                        <div class="profile-info-value">
+                            <input id="email" type="email" style="width: 299px" name="password" placeholder="必填"/>
+                        </div>
+                    </div>
+                    <div class="profile-info-row" >
+                        <div class="profile-info-name"> 角色 </div>
+
+                        <div class="profile-info-value">
+                            <input id="usertype" type="email" style="width: 299px" name="usertype" placeholder="1-管理员，2-普通用户"/>
+                        </div>
+                    </div>
+                     <div class="space-2"></div>
+                    <div class="profile-info-row">
+                        <button class="btn btn-white btn-info btn-bold" onclick="adduser()">
+                            <i class="ace-icon glyphicon glyphicon-plus blue"></i>
+                            添加
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <!--<p>用户列表</p>-->
+
+
+
+                <div style="float: left">
+                    <div class="space-12"></div>
+                    <h3 class="header smaller lighter blue">
+                    用户列表
+                    <small>用户信息;</small>
+                    </h3>
+                    <table id="simple-table" class="table  table-bordered table-hover">
+                        <thead><tr>
+                         <th style="width: 5%">时间</th>
+                         <th style="width: 5%">用户名</th>
+                         <th style="width: 5%">邮箱</th>
+                         <th style="width: 3%">usertype</th>
+                         <th style="width: 3%">操作</th>
+
+                        </tr></thead>
+                        <tbody>
+                        {% for r in userlist %}
+                        <tr>
+                        <td>{{r['ctime']}}</td>
+                        <td>{{r['username']}}</td>
+                        <td>{{r['email']}}</td>
+                        <td>{{r['usertype']}}</td>
+                        <td><button class="btn btn-minier btn-inverse" onclick=deluser("{{r['uid']}}")>删除</button></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pagescript %}
+<script>
+    function adduser() {
+        username = $("#username").val();
+        password = $("#password").val();
+        email = $("#email").val();
+        usertype = $("#usertype").val();
+
+        $.ajax({
+            url: "/adduser",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data: JSON.stringify({'username': username,'password':password,'email':email,'usertype':usertype}),
+            success: function (data) {
+                rs = data.result;
+                alert(rs);
+                location.reload();
+            },
+            error: function () {
+                alert('ajax请求错误!');
+            }
+        })
+
+    }
+
+       function deluser(uid) {
+        if(confirm('要删除该用户吗?')){
+            $.ajax({
+            url: "/deluser",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data: JSON.stringify({'uid':uid}),
+            success: function (data) {
+                rs = data.result;
+                alert(rs);
+                location.reload();
+            },
+            error:function () {
+                alert('ajax请求错误');
+            }
+        })
+    }}
+
+</script>
+{% endblock %}

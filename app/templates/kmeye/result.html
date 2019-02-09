@@ -1,0 +1,237 @@
+{% extends "lay.html" %}
+
+{% block maincontent %}
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs ace-save-state" id="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="ace-icon fa fa-home home-icon"></i>
+                        <a href="/kmrs">源码泄露</a>
+                    </li>
+                    <li class="active">监控结果</li>
+                </ul><!-- /.breadcrumb -->
+            </div>
+
+            <div class="page-content">
+                <div class="row">
+                    <div class="space-3"></div>
+
+                    <div class="vspace-12-sm"></div>
+
+                    <div class="col-sm-5" style="width: 650px">
+                        <div class="widget-box">
+                            <div class="widget-header widget-header-flat widget-header-small">
+                                <h5 class="widget-title">
+                                    <i class="ace-icon fa fa-signal"></i>
+                                    源码泄露监控概览
+                                </h5>
+
+                            </div>
+
+                            <div class="widget-body">
+                                <div class="widget-main">
+                                    <div id="piechart-placeholder"></div>
+
+                                    <div class="hr hr8 hr-double"></div>
+
+                                    <div class="clearfix">
+                                        <div class="grid3">
+                                            <span class="grey">
+                                                <i class="ace-icon fa fa-bell fa-2x blue"></i>
+                                                &nbsp;泄露总项目数
+                                            </span>
+                                            <h4 class="bigger pull-right">{{ total_projcets }}</h4>
+                                        </div>
+
+                                        <div class="grid3">
+                                            <span class="grey" title="表示命中了payload的项目">
+                                                <i class="ace-icon fa fa-bolt fa-2x purple"></i>
+                                                &nbsp; 未确认
+                                            </span>
+                                            <h4 class="bigger pull-right">{{NoConfirm_projects}}</h4>
+                                        </div>
+
+                                        <div class="grid3">
+                                            <span class="grey" title="未确认的项目,请及时确认">
+                                                <i class="ace-icon fa fa-exchange fa-2x red"></i>
+                                                &nbsp; 已确认
+                                            </span>
+                                            <h4 class="bigger pull-right">{{confirm_projects}}</h4>
+                                        </div>
+                                    </div>
+                                </div><!-- /.widget-main -->
+                            </div><!-- /.widget-body -->
+                        </div><!-- /.widget-box -->
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+                <div class="space-2"></div>
+
+                <div id="result_table"></div>
+
+                <div class="page">
+                    <p id="page-text"></p>
+                    <ul id="page1" class="pagination"></ul>
+                </div>
+
+
+{% with message = get_flashed_messages() %}
+{% if message %}
+{% for msg in message %}
+<p>{{msg}}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+
+{% if form and form.errors %}
+{% for key, error in form.errors.items() %}
+<div class="alert alert-warning" role="alert">{{ error }}</div>
+{% endfor %}
+{% endif %}
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pagescript %}
+<script type="text/javascript" src="/assets/js/jq-paginator.js"></script>
+
+<script type="text/javascript">
+    function create_table(n){
+        $.ajax({
+            url: "/kmrs/" + n,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success: function(data){
+                // rs = JSON.parse(data);
+                // rs = JSON.stringify(data);
+                // alert(data.result);
+                chain_records = data.result;
+
+
+                table_content = '<table id="simple-table" class="table  table-bordered table-hover"> \
+                <thead><tr>\
+                <th style="width: 3%">来源</th>\
+                <th style="width: 10%">作者名称</th>\
+                <th style="width: 10%">项目名称</th>\
+                <th style="width: 10%">项目地址</th>\
+                <th style="width: 3%">确认与否</th>\
+                <th style="width: 3%">白名单</th>\
+                <th style="width: 6%">详细信息</th>\
+                </tr></thead>'
+                table_content += '<tbody>'
+
+                chain_records.forEach(function(chain){
+
+                    table_content += '<tr>'
+
+                    table_content += '<td>'
+                    table_content += chain.source
+                    table_content += '</td>'
+
+                    table_content += '<td>'
+                    table_content += chain.owner
+                    table_content += '</td>'
+
+                    table_content += '<td>'
+                    table_content += chain.pname
+                    table_content += '</td>'
+
+                    table_content += '<td>'
+                    table_content += chain.purl
+                    table_content += '</td>'
+
+                    if(!chain.confirmv){
+                        table_content += '<td>'
+                        table_content += '<span class="label label-warning"><i class="ace-icon fa fa-exclamation-triangle bigger-120"></i>未确认</span>'
+                        table_content += '</td>'
+
+                    }else {
+                        table_content += '<td>'
+                        table_content += '<span class="label label-success arrowed">已确认</span>'
+                        table_content += '</td>'
+                    }
+
+                    table_content += '<td>'
+                    table_content += '<button class="btn btn-minier btn-success" onclick=addwhitelist("' +chain.owner + '","' + chain.pname + '","' + chain.purl + '")>+白名单</button>'
+                    table_content += '</td>'
+
+                    table_content += '<td>'
+                    table_content += '<a href="kmrs/detail/' + chain.owner + '/' + chain.pname + '">详细信息</a>'
+                    table_content += '</td>'
+
+                    table_content += '</tr>'
+                })
+                table_content += '</tbody>'
+                table_content += '</table>'
+                $("#result_table").html(table_content);
+            },
+            error: function () {
+                alert('ajax请求错误!')
+            }
+        })
+    }
+
+    $(function () {
+        $.ajax({
+            url:"/kmrs/pageinfo",
+            type: "get",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            success:function (data) {
+                tP = data.total_page;
+
+               $("#page1").jqPaginator({
+                    totalPages: tP,//设置分页的总数量
+                    visiblePages: 10, //设置最多显示的页码数
+                    currentPage: 1, //设置当前的页面
+                    first: '<li class="first"><a href="javascript:void(0);">First<\/a><\/li>',
+                    prev: '<li class="prev"><a href="javascript:void(0);">Previous<\/a><\/li>',
+                    next: '<li class="next"><a href="javascript:void(0);">Next<\/a><\/li>',
+                    last: '<li class="last"><a href="javascript:void(0);">Last<\/a><\/li>',
+                    page: '<li class="page"><a href="javascript:void(0);">&page&<\/a><\/li>',
+                    onPageChange: function (n) {
+                // $("#demo1-text").html("当前第" + n + "页");
+                // alert(n);
+                    create_table(n);
+                    }
+                });
+
+            },
+            error: function () {
+                alert('ajax请求错误!')
+            }
+        })
+    })
+
+    function addwhitelist(owner,pname,purl) {
+        $.ajax({
+            url: "/kmaddwl",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            async: true,
+            data:JSON.stringify({'owner':owner,'pname':pname,'purl':purl}),
+            success:function (data) {
+                rs = data.result;
+                if(rs = 'ok'){
+                    alert('白名单添加成功,历史记录也会被清除');
+                    location.reload();
+                }
+            },
+            error:function () {
+                alert('ajax请求失败');
+            }
+        })
+
+    }
+</script>
+
+
+{% endblock %}
