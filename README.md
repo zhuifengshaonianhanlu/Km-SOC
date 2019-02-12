@@ -73,7 +73,7 @@
 
 ![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-1.png)
 </br>
-结果展示-2：这里详细显示了搜索的结果，同时会按照文件类型进行统计展示，点击某个问价类型，可以单独显示该类型所有的搜索结果。
+结果展示-2：这里详细显示了搜索的结果，同时会按照文件类型进行统计展示，点击某个文件类型，可以单独显示该类型所有的搜索结果。
 同时，点击payload,会仅显示该payload的结果。
 
 ![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-2.png)
