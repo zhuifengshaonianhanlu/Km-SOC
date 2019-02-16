@@ -61,23 +61,7 @@
 ![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/login.png)
 </br>
 
-用户管理界面：
 
-![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/user.png)
-</br>
-配置管理界面：所有的配置可以在这里添加
-
-![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/conf.png)
-</br>
-结果展示-1：所有命中了keyword的项目都会在这里列出来，可以在这里添加白名单（白名单里面的项目下次不会扫描）
-
-![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-1.png)
-</br>
-结果展示-2：这里详细显示了搜索的结果，同时会按照文件类型进行统计展示，点击某个文件类型，可以单独显示该类型所有的搜索结果。
-同时，点击payload,会仅显示该payload的结果。
-
-![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/rs-2.png)
-</br>
 
 python项目，用到的框架为Flask,数据库为mysql。
 
