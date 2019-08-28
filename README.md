@@ -58,7 +58,7 @@
 截几张图：(如果加载不出来，点一下可以单独打开)
 登录界面：
 </br>
-![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/tree/master/images/login.png)
+![image](http://github.com/zhuifengshaonianhanlu/Km-SOC/raw/master/images/login.png)
 </br>
 
 
